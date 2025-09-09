@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "500338260208",
+    "firebase_url": "https://fahad-c004a-default-rtdb.firebaseio.com",
+    "project_id": "fahad-c004a",
+    "storage_bucket": "fahad-c004a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500338260208:android:5c7634a62a6815cb5b2a35",
+        "android_client_info": {
+          "package_name": "com.android.iunoob.bloodbank"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqVD58aHIfy-H4ZWrFmy5N22OKI6vssuY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500338260208:android:c86534cfe840b3e25b2a35",
+        "android_client_info": {
+          "package_name": "com.blood.app.rider"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqVD58aHIfy-H4ZWrFmy5N22OKI6vssuY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
