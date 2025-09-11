@@ -28,7 +28,10 @@ class HomeView extends GetView<HomeController> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 560),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -63,14 +66,53 @@ class HomeView extends GetView<HomeController> {
 
                       SizedBox(height: 0.8.h),
 
-                      Text(
-                        'LOCKED IN',
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.heading.copyWith(
-                          color: navy,
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.w800,
-                          height: 1.0,
+                      // Dynamic status display
+                      Obx(
+                        () => Column(
+                          children: [
+                            Text(
+                              controller.currentStatus.value.toUpperCase(),
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.heading.copyWith(
+                                color: navy,
+                                fontSize: 24.sp,
+                                fontWeight: FontWeight.w800,
+                                height: 1.0,
+                              ),
+                            ),
+                            if (controller.statusStartTime.value != null) ...[
+                              SizedBox(height: 1.h),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 3.w,
+                                  vertical: 1.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: navy.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: navy.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.timer, color: navy, size: 16.sp),
+                                    SizedBox(width: 1.w),
+                                    Text(
+                                      'Time remaining: ${controller.timeRemaining.value}',
+                                      style: AppTextStyles.bodyTextBold
+                                          .copyWith(
+                                            color: navy,
+                                            fontSize: 11.sp,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
 
@@ -117,10 +159,17 @@ class HomeView extends GetView<HomeController> {
                               radius: 40,
                               backgroundColor: const Color(0xFFE6EDF3),
                               backgroundImage:
-                                  partnerAvatarUrl != null ? NetworkImage(partnerAvatarUrl) : null,
-                              child: partnerAvatarUrl == null
-                                  ? Icon(Icons.person, size: 48, color: navy.withOpacity(0.35))
-                                  : null,
+                                  partnerAvatarUrl != null
+                                      ? NetworkImage(partnerAvatarUrl)
+                                      : null,
+                              child:
+                                  partnerAvatarUrl == null
+                                      ? Icon(
+                                        Icons.person,
+                                        size: 48,
+                                        color: navy.withOpacity(0.35),
+                                      )
+                                      : null,
                             ),
 
                             SizedBox(height: 2.2.h),
@@ -197,7 +246,11 @@ class _ActionBar extends StatelessWidget {
               ),
             ),
           ),
-          Container(width: 1, height: double.infinity, color: navy.withOpacity(0.25)),
+          Container(
+            width: 1,
+            height: double.infinity,
+            color: navy.withOpacity(0.25),
+          ),
           Expanded(
             child: InkWell(
               borderRadius: const BorderRadius.only(
@@ -251,25 +304,27 @@ class _LockHeartPainter extends CustomPainter {
     );
     canvas.drawRRect(body, p);
 
-    final sp = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = w * 0.12
-      ..strokeCap = StrokeCap.round
-      ..color = color;
-    final arc = Path()
-      ..addArc(
-        Rect.fromCircle(center: Offset(w / 2, h * 0.40), radius: w * 0.30),
-        3.14 + 0.35,
-        3.14 - 0.70,
-      );
+    final sp =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = w * 0.12
+          ..strokeCap = StrokeCap.round
+          ..color = color;
+    final arc =
+        Path()..addArc(
+          Rect.fromCircle(center: Offset(w / 2, h * 0.40), radius: w * 0.30),
+          3.14 + 0.35,
+          3.14 - 0.70,
+        );
     canvas.drawPath(arc, sp);
 
     final cut = Paint()..color = const Color(0xFFE8F2FB);
     final cx = w / 2, cy = h * 0.66, r = w * 0.13;
-    final heart = Path()
-      ..moveTo(cx, cy + r * 0.5)
-      ..cubicTo(cx + r, cy, cx + r * 0.9, cy - r * 0.8, cx, cy - r * 0.4)
-      ..cubicTo(cx - r * 0.9, cy - r * 0.8, cx - r, cy, cx, cy + r * 0.5);
+    final heart =
+        Path()
+          ..moveTo(cx, cy + r * 0.5)
+          ..cubicTo(cx + r, cy, cx + r * 0.9, cy - r * 0.8, cx, cy - r * 0.4)
+          ..cubicTo(cx - r * 0.9, cy - r * 0.8, cx - r, cy, cx, cy + r * 0.5);
     canvas.drawPath(heart, cut);
   }
 

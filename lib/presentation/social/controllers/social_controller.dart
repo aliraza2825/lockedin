@@ -137,7 +137,7 @@ class SocialController extends GetxController
         userName: 'Hallie R',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-        content: 'paid Maret M',
+        content: 'pair Maret M',
         description: 'gameday buttons',
         createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
         likesCount: 12,
@@ -152,7 +152,7 @@ class SocialController extends GetxController
         userName: 'Kevin H',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-        content: 'paid Michael M',
+        content: 'pair Michael M',
         description: 'Silly bills',
         createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
         likesCount: 8,
@@ -167,7 +167,7 @@ class SocialController extends GetxController
         userName: 'Kristina B',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-        content: 'paid Annette L',
+        content: 'pair Annette L',
         description: 'TV',
         createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
         likesCount: 15,
@@ -182,7 +182,7 @@ class SocialController extends GetxController
         userName: 'Elliott G',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-        content: 'paid Liam G',
+        content: 'pair Liam G',
         description: '💦☔️🔥',
         createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
         likesCount: 22,
@@ -197,7 +197,7 @@ class SocialController extends GetxController
         userName: 'Adam L',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
-        content: 'paid Tunde A',
+        content: 'pair Tunde A',
         description: 'Lucern train',
         createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
         likesCount: 7,
@@ -212,7 +212,7 @@ class SocialController extends GetxController
         userName: 'Jessie L',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
-        content: 'paid Justin L',
+        content: 'pair Justin L',
         description: 'Sailing away down a dragons 🐉',
         createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
         likesCount: 18,

@@ -45,8 +45,8 @@ class SplashController extends GetxController {
       // Check if user has seen onboarding before
       bool hasSeenOnboarding = sp.getBool('has_seen_onboarding') ?? false;
       if (hasSeenOnboarding) {
-        navigateTo(Routes.SIGNIN_WITH_PIN, null, prop: false);
-        // navigateTo(Routes.NAVBAR, null, prop: false);
+        // navigateTo(Routes.SIGNIN_WITH_PIN, null, prop: false);
+        navigateTo(Routes.NAVBAR, null, prop: false);
       } else {
         navigateTo(Routes.ONBOARDING, null, prop: false);
       }
