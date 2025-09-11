@@ -43,12 +43,20 @@ class SocialView extends GetView<SocialController> {
             fontSize: 14.sp,
             color: Colors.white,
           ),
-          tabs: const [Tab(text: 'Feed'), Tab(text: 'Friends')],
+          tabs: const [
+            Tab(text: 'Feed'),
+            Tab(text: 'Friends'),
+            Tab(text: 'Paired'),
+          ],
         ),
       ),
       body: TabBarView(
         controller: controller.tabController,
-        children: [_buildFeedTab(), _buildFriendsTab(context)],
+        children: [
+          _buildFeedTab(),
+          _buildFriendsTab(context),
+          _buildPairedTab(),
+        ],
       ),
     );
   }
@@ -846,6 +854,245 @@ class SocialView extends GetView<SocialController> {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPairedTab() {
+    return Obx(() {
+      final pairedUsers = controller.pairedUsers;
+      return pairedUsers.isEmpty
+          ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.people, color: AppColors.grey400, size: 50.sp),
+                SizedBox(height: 2.h),
+                Text(
+                  'No paired users yet',
+                  style: AppTextStyles.bodyText400.copyWith(
+                    fontSize: 14.sp,
+                    color: AppColors.grey500,
+                  ),
+                ),
+                SizedBox(height: 1.h),
+                Text(
+                  'Start pairing with other users to see them here',
+                  style: AppTextStyles.bodyText400.copyWith(
+                    fontSize: 12.sp,
+                    color: AppColors.grey400,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          )
+          : ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+            itemCount: pairedUsers.length,
+            itemBuilder: (context, index) {
+              final pairedUser = pairedUsers[index];
+              return _buildPairedUserCard(pairedUser);
+            },
+          );
+    });
+  }
+
+  Widget _buildPairedUserCard(pairedUser) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 2.h),
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color:
+              pairedUser.status == 'Active'
+                  ? AppColors.primary.withOpacity(0.3)
+                  : AppColors.grey300,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Status indicator
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                decoration: BoxDecoration(
+                  color:
+                      pairedUser.status == 'Active'
+                          ? AppColors.primary.withOpacity(0.1)
+                          : AppColors.grey200,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  pairedUser.status,
+                  style: AppTextStyles.bodyTextBold.copyWith(
+                    fontSize: 10.sp,
+                    color:
+                        pairedUser.status == 'Active'
+                            ? AppColors.primary
+                            : AppColors.grey500,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                controller.getTimeAgo(pairedUser.pairedAt),
+                style: AppTextStyles.bodyText400.copyWith(
+                  fontSize: 11.sp,
+                  color: AppColors.grey500,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 2.h),
+
+          // Paired users section
+          Row(
+            children: [
+              // User A
+              Expanded(
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 25.sp,
+                      backgroundImage: CachedNetworkImageProvider(
+                        pairedUser.userAProfileImageUrl,
+                      ),
+                    ),
+                    SizedBox(height: 1.h),
+                    Text(
+                      pairedUser.userAName,
+                      style: AppTextStyles.bodyTextBold.copyWith(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+
+              // VS or Heart icon
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 3.w),
+                child: Column(
+                  children: [
+                    Icon(
+                      pairedUser.status == 'Active'
+                          ? Icons.favorite
+                          : Icons.people_outline,
+                      color:
+                          pairedUser.status == 'Active'
+                              ? AppColors.primary
+                              : AppColors.grey400,
+                      size: 20.sp,
+                    ),
+                    SizedBox(height: 0.5.h),
+                    Text(
+                      'PAIRED',
+                      style: AppTextStyles.bodyTextBold.copyWith(
+                        fontSize: 8.sp,
+                        color:
+                            pairedUser.status == 'Active'
+                                ? AppColors.primary
+                                : AppColors.grey400,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // User B
+              Expanded(
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 25.sp,
+                      backgroundImage: CachedNetworkImageProvider(
+                        pairedUser.userBProfileImageUrl,
+                      ),
+                    ),
+                    SizedBox(height: 1.h),
+                    Text(
+                      pairedUser.userBName,
+                      style: AppTextStyles.bodyTextBold.copyWith(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          // Description and location
+          if (pairedUser.description != null ||
+              pairedUser.location != null) ...[
+            SizedBox(height: 2.h),
+            Container(
+              padding: EdgeInsets.all(3.w),
+              decoration: BoxDecoration(
+                color: AppColors.grey100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (pairedUser.description != null) ...[
+                    Text(
+                      pairedUser.description!,
+                      style: AppTextStyles.bodyText400.copyWith(
+                        fontSize: 11.sp,
+                        color: AppColors.grey500,
+                      ),
+                    ),
+                    if (pairedUser.location != null) SizedBox(height: 1.h),
+                  ],
+                  if (pairedUser.location != null) ...[
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          color: AppColors.grey500,
+                          size: 14.sp,
+                        ),
+                        SizedBox(width: 1.w),
+                        Text(
+                          pairedUser.location!,
+                          style: AppTextStyles.bodyText400.copyWith(
+                            fontSize: 10.sp,
+                            color: AppColors.grey500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

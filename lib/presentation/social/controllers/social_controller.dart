@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:locked_in/data/models/social/social_user.dart';
 import 'package:locked_in/data/models/social/social_post.dart';
 import 'package:locked_in/data/models/social/social_comment.dart';
+import 'package:locked_in/data/models/social/paired_user.dart';
 
 class SocialController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -12,6 +13,7 @@ class SocialController extends GetxController
   final RxList<SocialUser> users = <SocialUser>[].obs;
   final RxList<SocialPost> posts = <SocialPost>[].obs;
   final RxList<SocialComment> comments = <SocialComment>[].obs;
+  final RxList<PairedUser> pairedUsers = <PairedUser>[].obs;
   final RxString selectedPostId = ''.obs;
   final TextEditingController commentController = TextEditingController();
   final RxList<String> selectedTags = <String>[].obs;
@@ -30,7 +32,7 @@ class SocialController extends GetxController
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(length: 2, vsync: this);
+    tabController = TabController(length: 3, vsync: this);
     tabController.addListener(() {
       selectedTabIndex.value = tabController.index;
     });
@@ -253,6 +255,70 @@ class SocialController extends GetxController
         isLiked: true,
         tags: ['recommendation', 'food'],
         replies: [],
+      ),
+    ]);
+
+    // Dummy paired users data
+    pairedUsers.addAll([
+      PairedUser(
+        id: '1',
+        userAId: 'current_user',
+        userAName: 'You',
+        userAProfileImageUrl:
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        userBId: '1',
+        userBName: 'Sarah Johnson',
+        userBProfileImageUrl:
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        pairedAt: DateTime.now().subtract(const Duration(hours: 2)),
+        status: 'Active',
+        location: 'Central Park, NYC',
+        description: 'Met at the coffee shop and decided to pair up!',
+      ),
+      PairedUser(
+        id: '2',
+        userAId: '3',
+        userAName: 'Emma Davis',
+        userAProfileImageUrl:
+            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+        userBId: '4',
+        userBName: 'Alex Rodriguez',
+        userBProfileImageUrl:
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        pairedAt: DateTime.now().subtract(const Duration(days: 1)),
+        status: 'Active',
+        location: 'Art Gallery, LA',
+        description: 'Connected through mutual love for art',
+      ),
+      PairedUser(
+        id: '3',
+        userAId: '5',
+        userAName: 'Lisa Wang',
+        userAProfileImageUrl:
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
+        userBId: '6',
+        userBName: 'David Kim',
+        userBProfileImageUrl:
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+        pairedAt: DateTime.now().subtract(const Duration(hours: 6)),
+        status: 'Active',
+        location: 'Music Studio, Austin',
+        description: 'Food and music collaboration',
+      ),
+      PairedUser(
+        id: '4',
+        userAId: '2',
+        userAName: 'Mike Chen',
+        userAProfileImageUrl:
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+        userBId: '7',
+        userBName: 'Jessica Lee',
+        userBProfileImageUrl:
+            'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+        pairedAt: DateTime.now().subtract(const Duration(days: 3)),
+        status: 'Expired',
+        location: 'Tech Conference, SF',
+        description: 'Met at the tech conference',
       ),
     ]);
   }
