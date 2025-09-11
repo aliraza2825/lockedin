@@ -55,6 +55,7 @@ abstract class Routes {
   static const CHAT_ROOM = _Paths.CHAT_ROOM;
   static const SIGNUP = _Paths.SIGNUP;
   static const VERIFY_NFC = _Paths.VERIFY_NFC;
+  static const ONBOARDING = _Paths.ONBOARDING;
 }
 
 abstract class _Paths {
@@ -111,4 +112,5 @@ abstract class _Paths {
   static const CHAT_ROOM = '/chat-room';
   static const SIGNUP = '/signup';
   static const VERIFY_NFC = '/verify-nfc';
+  static const ONBOARDING = '/onboarding';
 }

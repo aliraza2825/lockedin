@@ -41,18 +41,58 @@ void main() async {
   });
 }
 
+/// Function to clear all SharedPreferences data
+/// This can be useful for debugging, testing, or implementing a "clear data" feature
+Future<void> clearSharedPreferences() async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    print('✅ SharedPreferences cleared successfully');
+  } catch (e) {
+    print('❌ Error clearing SharedPreferences: $e');
+  }
+}
+
+/// Function to clear specific SharedPreferences keys
+/// Useful for clearing only certain data while keeping others
+Future<void> clearSpecificSharedPreferences(List<String> keys) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    for (String key in keys) {
+      await prefs.remove(key);
+    }
+    print('✅ Specific SharedPreferences keys cleared: $keys');
+  } catch (e) {
+    print('❌ Error clearing specific SharedPreferences: $e');
+  }
+}
+
+/// Function to reset onboarding status
+/// This will make the app show onboarding again on next launch
+Future<void> resetOnboardingStatus() async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_seen_onboarding', false);
+    print('✅ Onboarding status reset - will show onboarding on next launch');
+  } catch (e) {
+    print('❌ Error resetting onboarding status: $e');
+  }
+}
+
 class MyApp extends StatelessWidget {
   final String? savedLocale;
   const MyApp({super.key, this.savedLocale});
 
   @override
   Widget build(BuildContext context) {
+    // clearSharedPreferences();
     return DevicePreview(
       enabled: false,
       builder:
           (context) => Sizer(
             builder: (context, orientation, deviceType) {
               return GetMaterialApp(
+                debugShowCheckedModeBanner: false,
                 title: "Medical Rider",
                 initialRoute: AppPages.INITIAL,
                 getPages: AppPages.routes,

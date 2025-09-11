@@ -107,6 +107,7 @@ flutter:
     - assets/add_tool.gif
     - assets/search.json
     - assets/animated_logo.json
+    - assets/onboarding/
     - assets/content.docx
     - .env
 

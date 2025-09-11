@@ -43,6 +43,8 @@ import 'package:locked_in/presentation/verify_through_nfc/bindings/verify_nfc_bi
 import 'package:locked_in/presentation/verify_through_nfc/views/verify_nfc_view.dart';
 import 'package:locked_in/presentation/welcome/bindings/welcome_binding.dart';
 import 'package:locked_in/presentation/welcome/views/welcome_view.dart';
+import 'package:locked_in/presentation/onboarding/bindings/onboarding_binding.dart';
+import 'package:locked_in/presentation/onboarding/views/onboarding_view.dart';
 
 part 'app_routes.dart';
 
@@ -263,6 +265,13 @@ class AppPages {
       name: _Paths.VERIFY_NFC,
       page: () => VerifyPromptView(),
       binding: VerifyNfcBinding(),
+    ),
+    GetPage(
+      name: _Paths.ONBOARDING,
+      page: () => const OnboardingView(),
+      binding: OnboardingBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
   ];
 }

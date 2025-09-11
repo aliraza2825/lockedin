@@ -81,7 +81,7 @@ class ProfileView extends GetView<ProfileController> {
                     ),
                   ),
                   1.h.height,
-                
+
                   GestureDetector(
                     onTap: () {
                       Get.toNamed(Routes.CONTACT_US);
@@ -146,15 +146,15 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     ),
                   ),
-                  2.h.height,
-                  if (Globals.authToken == "")
-                    CustomGradientButton(
-                      text: 'Login'.tr,
-                      onPress: () async {
-                        Get.offAllNamed(Routes.SIGNIN_WITH_PIN);
-                      },
-                    ),
-                  4.h.height,
+                  // 2.h.height,
+                  // if (Globals.authToken == "")
+                  //   CustomGradientButton(
+                  //     text: 'Login'.tr,
+                  //     onPress: () async {
+                  //       Get.offAllNamed(Routes.SIGNIN_WITH_PIN);
+                  //     },
+                  //   ),
+                  // 4.h.height,
                 ],
               ).paddingSymmetric(horizontal: 20),
             ),

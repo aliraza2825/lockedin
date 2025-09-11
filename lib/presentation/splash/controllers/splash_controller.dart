@@ -42,7 +42,14 @@ class SplashController extends GetxController {
     if (Globals.authToken != "") {
       verifyToken();
     } else {
-      navigateTo(Routes.SIGNIN_WITH_PIN, null, prop: false);
+      // Check if user has seen onboarding before
+      bool hasSeenOnboarding = sp.getBool('has_seen_onboarding') ?? false;
+      if (hasSeenOnboarding) {
+        navigateTo(Routes.SIGNIN_WITH_PIN, null, prop: false);
+        // navigateTo(Routes.NAVBAR, null, prop: false);
+      } else {
+        navigateTo(Routes.ONBOARDING, null, prop: false);
+      }
     }
   }
 
@@ -81,15 +88,17 @@ class SplashController extends GetxController {
           if (Platform.isIOS) {
             if (versionIOS != Globals.appVersion ||
                 buildIOS != int.parse(Globals.buildNumber!)) {
-              Future.delayed(Duration(seconds: 2))
-                  .then((value) => updateRequired());
+              Future.delayed(
+                Duration(seconds: 2),
+              ).then((value) => updateRequired());
               isForceUpdate = true;
             }
           } else if (Platform.isAndroid) {
             if (versionAndroid != Globals.appVersion ||
                 buildAndroid != int.parse(Globals.buildNumber!)) {
-              Future.delayed(Duration(seconds: 2))
-                  .then((value) => updateRequired());
+              Future.delayed(
+                Duration(seconds: 2),
+              ).then((value) => updateRequired());
             }
           }
         } else {
@@ -104,74 +113,77 @@ class SplashController extends GetxController {
 
   updateRequired() {
     showDialog(
-        context: Get.context!,
-        barrierDismissible: false,
-        builder: (c) {
-          return AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  Utils.getIconPath("logo"),
-                  scale: 8.0,
-                ).paddingOnly(right: 32),
-                SizedBox(
-                  height: 8,
+      context: Get.context!,
+      barrierDismissible: false,
+      builder: (c) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                Utils.getIconPath("logo"),
+                scale: 8.0,
+              ).paddingOnly(right: 32),
+              SizedBox(height: 8),
+              Text(
+                "New version available",
+                style: AppTextStyles.heading.copyWith(
+                  fontSize: 18,
+                  color: AppColors.primary,
                 ),
-                Text(
-                  "New version available",
-                  style: AppTextStyles.heading
-                      .copyWith(fontSize: 18, color: AppColors.primary),
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 4),
+              Text(
+                "${Platform.isIOS ? "${versionIOS} ($buildIOS)" : "${versionAndroid} ($buildAndroid)"}",
+                style: AppTextStyles.heading.copyWith(
+                  fontSize: 18,
+                  color: AppColors.primary,
                 ),
-                SizedBox(
-                  height: 4,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 8),
+              Text(
+                "Looks like you have an older version of the app. Please update to get latest features and best experience.",
+                maxLines: 4,
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 14,
+                  color: AppColors.black,
                 ),
-                Text(
-                  "${Platform.isIOS ? "${versionIOS} ($buildIOS)" : "${versionAndroid} ($buildAndroid)"}",
-                  style: AppTextStyles.heading
-                      .copyWith(fontSize: 18, color: AppColors.primary),
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                Text(
-                  "Looks like you have an older version of the app. Please update to get latest features and best experience.",
-                  maxLines: 4,
-                  style: AppTextStyles.bodyText
-                      .copyWith(fontSize: 14, color: AppColors.black),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: 16,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    openAppStore();
-                  },
-                  child: Container(
-                    height: 36,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(22),
-                        gradient: AppColors.secondaryGradient),
-                    child: Center(
-                      child: Text(
-                        "Update",
-                        style: AppTextStyles.bodyTextBold
-                            .copyWith(fontSize: 18, color: AppColors.white),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              GestureDetector(
+                onTap: () {
+                  openAppStore();
+                },
+                child: Container(
+                  height: 36,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(22),
+                    gradient: AppColors.secondaryGradient,
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Update",
+                      style: AppTextStyles.bodyTextBold.copyWith(
+                        fontSize: 18,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
-                )
-              ],
-            ),
-          );
-        });
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void openAppStore() async {
@@ -182,7 +194,10 @@ class SplashController extends GetxController {
       url = 'https://apps.apple.com/app/6738170498';
     }
 
-    if (!await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)) {
+    if (!await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    )) {
       throw Exception('Could not launch $url');
     }
   }
