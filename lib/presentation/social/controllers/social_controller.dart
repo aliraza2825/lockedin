@@ -5,6 +5,8 @@ import 'package:locked_in/data/models/social/social_user.dart';
 import 'package:locked_in/data/models/social/social_post.dart';
 import 'package:locked_in/data/models/social/social_comment.dart';
 import 'package:locked_in/data/models/social/paired_user.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SocialController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -25,6 +27,11 @@ class SocialController extends GetxController
   // Feed filter
   final RxString selectedFilter = 'All'.obs;
 
+  // Contacts
+  final RxList<Contact> contacts = <Contact>[].obs;
+  final RxBool isLoadingContacts = false.obs;
+  final RxString contactsPermissionStatus = 'unknown'.obs;
+
   // Friends search
   final TextEditingController searchController = TextEditingController();
   final RxString searchQuery = ''.obs;
@@ -37,6 +44,7 @@ class SocialController extends GetxController
       selectedTabIndex.value = tabController.index;
     });
     _loadDummyData();
+    loadContacts();
   }
 
   @override
@@ -139,14 +147,19 @@ class SocialController extends GetxController
         userName: 'Hallie R',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-        content: 'pair Maret M',
-        description: 'gameday buttons',
+        content: 'locked in',
+        description: 'Gameday buttons',
         createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
         likesCount: 12,
-        commentsCount: 3,
+        commentsCount: 5,
         isLiked: false,
         location: '',
         tags: [],
+        anonymous: false,
+        pairedUserId: '7',
+        pairedUserName: 'Maret M',
+        pairedUserProfileImageUrl:
+            'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
       ),
       SocialPost(
         id: '2',
@@ -154,14 +167,19 @@ class SocialController extends GetxController
         userName: 'Kevin H',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-        content: 'pair Michael M',
+        content: 'locked in',
         description: 'Silly bills',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
+        createdAt: DateTime.now().subtract(const Duration(minutes: 4)),
         likesCount: 8,
-        commentsCount: 1,
+        commentsCount: 2,
         isLiked: true,
         location: '',
         tags: [],
+        anonymous: false,
+        pairedUserId: '8',
+        pairedUserName: 'Michael M',
+        pairedUserProfileImageUrl:
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
       ),
       SocialPost(
         id: '3',
@@ -169,14 +187,19 @@ class SocialController extends GetxController
         userName: 'Kristina B',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-        content: 'pair Annette L',
+        content: 'locked in',
         description: 'TV',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-        likesCount: 15,
-        commentsCount: 2,
+        createdAt: DateTime.now().subtract(const Duration(minutes: 3)),
+        likesCount: 6,
+        commentsCount: 1,
         isLiked: false,
         location: '',
         tags: [],
+        anonymous: false,
+        pairedUserId: '9',
+        pairedUserName: 'Annette L',
+        pairedUserProfileImageUrl:
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
       ),
       SocialPost(
         id: '4',
@@ -184,14 +207,19 @@ class SocialController extends GetxController
         userName: 'Elliott G',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-        content: 'pair Liam G',
+        content: 'locked in',
         description: '💦☔️🔥',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-        likesCount: 22,
-        commentsCount: 5,
+        createdAt: DateTime.now().subtract(const Duration(minutes: 2)),
+        likesCount: 15,
+        commentsCount: 3,
         isLiked: true,
         location: '',
         tags: [],
+        anonymous: false,
+        pairedUserId: '10',
+        pairedUserName: 'Liam G',
+        pairedUserProfileImageUrl:
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
       ),
       SocialPost(
         id: '5',
@@ -199,14 +227,15 @@ class SocialController extends GetxController
         userName: 'Adam L',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
-        content: 'pair Tunde A',
+        content: 'locked in',
         description: 'Lucern train',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
+        createdAt: DateTime.now().subtract(const Duration(minutes: 1)),
         likesCount: 7,
         commentsCount: 1,
         isLiked: false,
         location: '',
         tags: [],
+        anonymous: true, // This one is anonymous
       ),
       SocialPost(
         id: '6',
@@ -214,14 +243,19 @@ class SocialController extends GetxController
         userName: 'Jessie L',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
-        content: 'pair Justin L',
+        content: 'locked in',
         description: 'Sailing away down a dragons 🐉',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
+        createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
         likesCount: 18,
         commentsCount: 4,
         isLiked: true,
         location: '',
         tags: [],
+        anonymous: false,
+        pairedUserId: '11',
+        pairedUserName: 'Justin L',
+        pairedUserProfileImageUrl:
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
       ),
     ]);
 
@@ -729,19 +763,58 @@ class SocialController extends GetxController
     }
   }
 
-  List<SocialUser> getFilteredFriends() {
-    if (searchQuery.value.isEmpty) {
-      return users.toList();
+  // Load contacts from phone
+  Future<void> loadContacts() async {
+    try {
+      isLoadingContacts.value = true;
+
+      // Check if permission is granted
+      final permission = await Permission.contacts.status;
+      if (permission.isDenied) {
+        // Request permission
+        final result = await Permission.contacts.request();
+        if (result.isDenied) {
+          contactsPermissionStatus.value = 'denied';
+          isLoadingContacts.value = false;
+          return;
+        }
+      }
+
+      if (permission.isPermanentlyDenied) {
+        contactsPermissionStatus.value = 'permanently_denied';
+        isLoadingContacts.value = false;
+        return;
+      }
+
+      // Load contacts
+      final contactsList = await FlutterContacts.getContacts(
+        withProperties: true,
+        withPhoto: true,
+      );
+
+      contacts.value = contactsList;
+      contactsPermissionStatus.value = 'granted';
+    } catch (e) {
+      print('Error loading contacts: $e');
+      contactsPermissionStatus.value = 'error';
+    } finally {
+      isLoadingContacts.value = false;
     }
-    return users
+  }
+
+  // Get filtered contacts for friends tab
+  List<Contact> getFilteredContacts() {
+    if (searchQuery.value.isEmpty) {
+      return contacts.toList();
+    }
+    return contacts
         .where(
-          (user) =>
-              user.name.toLowerCase().contains(
+          (contact) =>
+              contact.displayName.toLowerCase().contains(
                 searchQuery.value.toLowerCase(),
               ) ||
-              user.username.toLowerCase().contains(
-                searchQuery.value.toLowerCase(),
-              ),
+              (contact.phones.isNotEmpty &&
+                  contact.phones.first.number.contains(searchQuery.value)),
         )
         .toList();
   }
@@ -773,7 +846,7 @@ class SocialController extends GetxController
         userName: 'You',
         userProfileImageUrl:
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-        content: 'shared a post',
+        content: 'locked in',
         description: descriptionController.text,
         createdAt: DateTime.now(),
         likesCount: 0,
@@ -781,6 +854,7 @@ class SocialController extends GetxController
         isLiked: false,
         location: '',
         tags: [], // Empty tags since tags section was removed
+        anonymous: false, // Default to not anonymous
       );
 
       // Add to beginning of posts list

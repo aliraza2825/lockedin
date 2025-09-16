@@ -12,6 +12,10 @@ class SocialPost {
   final bool isLiked;
   final String location;
   final List<String> tags;
+  final bool anonymous;
+  final String? pairedUserId;
+  final String? pairedUserName;
+  final String? pairedUserProfileImageUrl;
 
   SocialPost({
     required this.id,
@@ -27,6 +31,10 @@ class SocialPost {
     required this.isLiked,
     required this.location,
     required this.tags,
+    required this.anonymous,
+    this.pairedUserId,
+    this.pairedUserName,
+    this.pairedUserProfileImageUrl,
   });
 
   factory SocialPost.fromJson(Map<String, dynamic> json) {
@@ -46,6 +54,10 @@ class SocialPost {
       isLiked: json['isLiked'] ?? false,
       location: json['location'] ?? '',
       tags: List<String>.from(json['tags'] ?? []),
+      anonymous: json['anonymous'] ?? false,
+      pairedUserId: json['pairedUserId'],
+      pairedUserName: json['pairedUserName'],
+      pairedUserProfileImageUrl: json['pairedUserProfileImageUrl'],
     );
   }
 
@@ -64,6 +76,10 @@ class SocialPost {
       'isLiked': isLiked,
       'location': location,
       'tags': tags,
+      'anonymous': anonymous,
+      'pairedUserId': pairedUserId,
+      'pairedUserName': pairedUserName,
+      'pairedUserProfileImageUrl': pairedUserProfileImageUrl,
     };
   }
 
@@ -81,6 +97,10 @@ class SocialPost {
     bool? isLiked,
     String? location,
     List<String>? tags,
+    bool? anonymous,
+    String? pairedUserId,
+    String? pairedUserName,
+    String? pairedUserProfileImageUrl,
   }) {
     return SocialPost(
       id: id ?? this.id,
@@ -96,6 +116,11 @@ class SocialPost {
       isLiked: isLiked ?? this.isLiked,
       location: location ?? this.location,
       tags: tags ?? this.tags,
+      anonymous: anonymous ?? this.anonymous,
+      pairedUserId: pairedUserId ?? this.pairedUserId,
+      pairedUserName: pairedUserName ?? this.pairedUserName,
+      pairedUserProfileImageUrl:
+          pairedUserProfileImageUrl ?? this.pairedUserProfileImageUrl,
     );
   }
 }

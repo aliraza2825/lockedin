@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:locked_in/app/config/app_colors.dart';
 import 'package:locked_in/app/config/app_text_styles.dart';
-import 'package:locked_in/data/models/social/social_user.dart';
 import 'package:locked_in/data/models/social/social_post.dart';
 import 'package:sizer/sizer.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import '../controllers/social_controller.dart';
 
 class SocialView extends GetView<SocialController> {
@@ -46,7 +46,7 @@ class SocialView extends GetView<SocialController> {
           tabs: const [
             Tab(text: 'Feed'),
             Tab(text: 'Friends'),
-            Tab(text: 'Paired'),
+            Tab(text: 'Locked In'),
           ],
         ),
       ),
@@ -55,7 +55,7 @@ class SocialView extends GetView<SocialController> {
         children: [
           _buildFeedTab(),
           _buildFriendsTab(context),
-          _buildPairedTab(),
+          _buildLockedInTab(),
         ],
       ),
     );
@@ -78,7 +78,7 @@ class SocialView extends GetView<SocialController> {
             onTapOutside: (event) => FocusScope.of(context).unfocus(),
             onChanged: controller.updateSearchQuery,
             decoration: InputDecoration(
-              hintText: 'Search friends...',
+              hintText: 'Search contacts...',
               hintStyle: AppTextStyles.bodyText400.copyWith(
                 fontSize: 12.sp,
                 color: AppColors.grey400,
@@ -125,25 +125,68 @@ class SocialView extends GetView<SocialController> {
             ),
           ),
         ),
-        // Friends list
+        // Contacts list
         Expanded(
           child: Obx(() {
-            final filteredFriends = controller.getFilteredFriends();
-            return filteredFriends.isEmpty
+            if (controller.isLoadingContacts.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (controller.contactsPermissionStatus.value == 'denied' ||
+                controller.contactsPermissionStatus.value ==
+                    'permanently_denied') {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.contacts_outlined,
+                      color: AppColors.grey400,
+                      size: 50.sp,
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'Contacts Permission Required',
+                      style: AppTextStyles.bodyText400.copyWith(
+                        fontSize: 14.sp,
+                        color: AppColors.grey500,
+                      ),
+                    ),
+                    SizedBox(height: 1.h),
+                    Text(
+                      'Please grant permission to access your contacts',
+                      style: AppTextStyles.bodyText400.copyWith(
+                        fontSize: 12.sp,
+                        color: AppColors.grey400,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 2.h),
+                    ElevatedButton(
+                      onPressed: () => controller.loadContacts(),
+                      child: Text('Grant Permission'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final filteredContacts = controller.getFilteredContacts();
+            return filteredContacts.isEmpty
                 ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.person_search,
+                        Icons.contacts_outlined,
                         color: AppColors.grey400,
                         size: 50.sp,
                       ),
                       SizedBox(height: 2.h),
                       Text(
                         controller.searchQuery.value.isEmpty
-                            ? 'No friends yet'
-                            : 'No friends found',
+                            ? 'No contacts found'
+                            : 'No contacts match your search',
                         style: AppTextStyles.bodyText400.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.grey500,
@@ -152,8 +195,8 @@ class SocialView extends GetView<SocialController> {
                       SizedBox(height: 1.h),
                       Text(
                         controller.searchQuery.value.isEmpty
-                            ? 'Start adding friends to see them here'
-                            : 'Try searching with a different name',
+                            ? 'Make sure you have contacts in your phone'
+                            : 'Try searching with a different name or number',
                         style: AppTextStyles.bodyText400.copyWith(
                           fontSize: 12.sp,
                           color: AppColors.grey400,
@@ -165,10 +208,10 @@ class SocialView extends GetView<SocialController> {
                 )
                 : ListView.builder(
                   padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                  itemCount: filteredFriends.length,
+                  itemCount: filteredContacts.length,
                   itemBuilder: (context, index) {
-                    final user = filteredFriends[index];
-                    return _buildUserCard(user);
+                    final contact = filteredContacts[index];
+                    return _buildContactCard(contact);
                   },
                 );
           }),
@@ -177,7 +220,7 @@ class SocialView extends GetView<SocialController> {
     );
   }
 
-  Widget _buildUserCard(SocialUser user) {
+  Widget _buildContactCard(Contact contact) {
     return Container(
       margin: EdgeInsets.only(bottom: 2.h),
       padding: EdgeInsets.all(3.w),
@@ -195,39 +238,40 @@ class SocialView extends GetView<SocialController> {
       child: Row(
         children: [
           // Profile image
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 6.w,
-                backgroundImage: CachedNetworkImageProvider(
-                  user.profileImageUrl,
-                ),
-              ),
-              if (user.isOnline)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 3.w,
-                    height: 3.w,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1.5),
+          CircleAvatar(
+            radius: 6.w,
+            backgroundColor: AppColors.primary.withOpacity(0.1),
+            child:
+                contact.photo != null
+                    ? ClipOval(
+                      child: Image.memory(
+                        contact.photo!,
+                        width: 12.w,
+                        height: 12.w,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                    : Text(
+                      contact.displayName.isNotEmpty
+                          ? contact.displayName[0].toUpperCase()
+                          : '?',
+                      style: AppTextStyles.bodyTextBold.copyWith(
+                        fontSize: 16.sp,
+                        color: AppColors.primary,
+                      ),
                     ),
-                  ),
-                ),
-            ],
           ),
           SizedBox(width: 3.w),
 
-          // User info
+          // Contact info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.name,
+                  contact.displayName.isNotEmpty
+                      ? contact.displayName
+                      : 'Unknown Contact',
                   style: AppTextStyles.bodyTextBold.copyWith(
                     fontSize: 14.sp,
                     color: AppColors.black,
@@ -236,93 +280,29 @@ class SocialView extends GetView<SocialController> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 0.5.h),
-                Text(
-                  user.username,
-                  style: AppTextStyles.bodyText400.copyWith(
-                    fontSize: 11.sp,
-                    color: AppColors.grey500,
+                if (contact.phones.isNotEmpty)
+                  Text(
+                    contact.phones.first.number,
+                    style: AppTextStyles.bodyText400.copyWith(
+                      fontSize: 11.sp,
+                      color: AppColors.grey500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 0.3.h),
-                Text(
-                  user.bio,
-                  style: AppTextStyles.bodyText400.copyWith(
-                    fontSize: 10.sp,
-                    color: AppColors.grey400,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 0.3.h),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 10.sp,
+                if (contact.emails.isNotEmpty) ...[
+                  SizedBox(height: 0.3.h),
+                  Text(
+                    contact.emails.first.address,
+                    style: AppTextStyles.bodyText400.copyWith(
+                      fontSize: 10.sp,
                       color: AppColors.grey400,
                     ),
-                    SizedBox(width: 0.5.w),
-                    Expanded(
-                      child: Text(
-                        user.location,
-                        style: AppTextStyles.bodyText400.copyWith(
-                          fontSize: 9.sp,
-                          color: AppColors.grey400,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (user.mutualFriends > 0) ...[
-                      SizedBox(width: 1.w),
-                      Text(
-                        '${user.mutualFriends} mutual',
-                        style: AppTextStyles.bodyText400.copyWith(
-                          fontSize: 9.sp,
-                          color: AppColors.primary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
-            ),
-          ),
-
-          // Action button
-          SizedBox(
-            width: 16.w,
-            height: 4.h,
-            child: ElevatedButton(
-              onPressed: () {
-                if (user.isFriend) {
-                  controller.removeFriend(user.id);
-                } else {
-                  controller.addFriend(user.id);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    user.isFriend ? AppColors.grey300 : AppColors.primary,
-                foregroundColor:
-                    user.isFriend ? AppColors.grey500 : Colors.white,
-                padding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(60),
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                user.isFriend ? 'Friends' : 'Add',
-                style: AppTextStyles.bodyTextBold.copyWith(
-                  fontSize: 9.sp,
-                  color: user.isFriend ? AppColors.grey500 : Colors.white,
-                ),
-              ),
             ),
           ),
         ],
@@ -357,14 +337,20 @@ class SocialView extends GetView<SocialController> {
               Expanded(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterChip('All'),
-                      SizedBox(width: 2.w),
-                      _buildFilterChip('My Posts'),
-                      SizedBox(width: 2.w),
-                      _buildFilterChip('Other Posts'),
-                    ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xffE9EFF6),
+                      borderRadius: BorderRadius.circular(60),
+                    ),
+                    child: Row(
+                      children: [
+                        _buildFilterChip('All'),
+                        SizedBox(width: 2.w),
+                        _buildFilterChip('My Posts'),
+                        SizedBox(width: 2.w),
+                        _buildFilterChip('Other Posts'),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -406,6 +392,7 @@ class SocialView extends GetView<SocialController> {
                   ),
                 )
                 : ListView.builder(
+                  shrinkWrap: true,
                   padding: EdgeInsets.zero,
                   itemCount: filteredPosts.length,
                   itemBuilder: (context, index) {
@@ -429,13 +416,13 @@ class SocialView extends GetView<SocialController> {
             color:
                 controller.selectedFilter.value == filter
                     ? AppColors.primary
-                    : AppColors.grey100,
-            borderRadius: BorderRadius.circular(20),
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(60),
             border: Border.all(
               color:
                   controller.selectedFilter.value == filter
                       ? AppColors.primary
-                      : AppColors.grey300,
+                      : Colors.transparent,
               width: 1,
             ),
           ),
@@ -446,7 +433,7 @@ class SocialView extends GetView<SocialController> {
               color:
                   controller.selectedFilter.value == filter
                       ? Colors.white
-                      : AppColors.grey500,
+                      : AppColors.black,
             ),
           ),
         ),
@@ -455,11 +442,30 @@ class SocialView extends GetView<SocialController> {
   }
 
   Widget _buildPostCard(SocialPost post) {
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.5.h),
-          child: Row(
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [Colors.grey.shade100.withOpacity(0.3), Colors.white],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.0, 1.0],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with profile picture and user interaction
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Profile picture
@@ -471,129 +477,142 @@ class SocialView extends GetView<SocialController> {
               ),
               SizedBox(width: 3.w),
 
-              // Content area
+              // User interaction text
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // User interaction text
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: post.userName,
-                            style: AppTextStyles.bodyTextBold.copyWith(
-                              fontSize: 14.sp,
-                              color: AppColors.black,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' ${post.content}',
-                            style: AppTextStyles.bodyText400.copyWith(
-                              fontSize: 13.sp,
-                              color: AppColors.black,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: post.userName,
+                        style: AppTextStyles.bodyTextBold.copyWith(
+                          fontSize: 14.sp,
+                          color: AppColors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 0.8.h),
-
-                    // Description
-                    Text(
-                      post.description,
-                      style: AppTextStyles.bodyText400.copyWith(
-                        fontSize: 13.sp,
-                        color: AppColors.grey500,
-                        fontWeight: FontWeight.w400,
+                      TextSpan(
+                        text: ' locked in ',
+                        style: AppTextStyles.bodyText400.copyWith(
+                          fontSize: 13.sp,
+                          color: AppColors.black,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 1.2.h),
-
-                    // Action buttons
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => controller.toggleLike(post.id),
-                          child: Row(
-                            children: [
-                              Icon(
-                                post.isLiked
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color:
-                                    post.isLiked
-                                        ? Colors.red
-                                        : AppColors.grey500,
-                                size: 15.sp,
-                              ),
-                              SizedBox(width: 1.w),
-                              Text(
-                                'Like',
-                                style: AppTextStyles.bodyText400.copyWith(
-                                  fontSize: 11.sp,
-                                  color: AppColors.grey500,
-                                ),
-                              ),
-                            ],
+                      if (!post.anonymous && post.pairedUserName != null) ...[
+                        // Colored person icon
+                        WidgetSpan(
+                          child: Container(
+                            margin: EdgeInsets.only(right: 1.w),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 1.w,
+                              vertical: 0.15.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getRandomColor(),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.person,
+                              size: 10.sp,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                        SizedBox(width: 4.w),
-                        GestureDetector(
-                          onTap:
-                              () => controller.openCommentBottomSheet(post.id),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.comment_outlined,
-                                color: AppColors.grey500,
-                                size: 15.sp,
-                              ),
-                              SizedBox(width: 1.w),
-                              Text(
-                                'Comment',
-                                style: AppTextStyles.bodyText400.copyWith(
-                                  fontSize: 11.sp,
-                                  color: AppColors.grey500,
-                                ),
-                              ),
-                            ],
+                        TextSpan(
+                          text: post.pairedUserName!,
+                          style: AppTextStyles.bodyTextBold.copyWith(
+                            fontSize: 13.sp,
+                            color: AppColors.black,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(width: 1.w),
+
+              // Timestamp
+              Text(
+                controller.getTimeAgo(post.createdAt),
+                style: AppTextStyles.bodyText400.copyWith(
+                  fontSize: 12.sp,
+                  color: AppColors.grey500,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 1.h),
+
+          // Description
+          Text(
+            post.description,
+            style: AppTextStyles.bodyText400.copyWith(
+              fontSize: 13.sp,
+              color: AppColors.grey500,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          SizedBox(height: 1.5.h),
+
+          // Action buttons with counts
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => controller.toggleLike(post.id),
+                child: Row(
+                  children: [
+                    Icon(
+                      post.isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: post.isLiked ? Colors.red : AppColors.grey500,
+                      size: 15.sp,
+                    ),
+                    SizedBox(width: 1.w),
+                    Text(
+                      '${post.likesCount}',
+                      style: AppTextStyles.bodyText400.copyWith(
+                        fontSize: 11.sp,
+                        color: AppColors.grey500,
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              // Timestamp and more options
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    controller.getTimeAgo(post.createdAt),
-                    style: AppTextStyles.bodyText400.copyWith(
-                      fontSize: 12.sp,
-                      color: AppColors.grey500,
+              SizedBox(width: 4.w),
+              GestureDetector(
+                onTap: () => controller.openCommentBottomSheet(post.id),
+                child: Row(
+                  children: [
+                    Icon(Icons.comment, color: AppColors.grey500, size: 15.sp),
+                    SizedBox(width: 1.w),
+                    Text(
+                      '${post.commentsCount}',
+                      style: AppTextStyles.bodyText400.copyWith(
+                        fontSize: 11.sp,
+                        color: AppColors.grey500,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 0.5.h),
-                  Icon(Icons.more_vert, color: AppColors.grey500, size: 18.sp),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
-        ),
-        // Divider
-        Container(
-          height: 0.5,
-          color: AppColors.grey200,
-          margin: EdgeInsets.symmetric(horizontal: 4.w),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  // Helper method to get random colors for the person icons
+  Color _getRandomColor() {
+    final colors = [
+      Colors.green,
+      Colors.purple,
+      Colors.pink,
+      Colors.blue,
+      Colors.orange,
+    ];
+    return colors[DateTime.now().millisecondsSinceEpoch % colors.length];
   }
 
   void _showAddPostBottomSheet() {
@@ -859,7 +878,7 @@ class SocialView extends GetView<SocialController> {
     );
   }
 
-  Widget _buildPairedTab() {
+  Widget _buildLockedInTab() {
     return Obx(() {
       final pairedUsers = controller.pairedUsers;
       return pairedUsers.isEmpty
@@ -870,7 +889,7 @@ class SocialView extends GetView<SocialController> {
                 Icon(Icons.people, color: AppColors.grey400, size: 50.sp),
                 SizedBox(height: 2.h),
                 Text(
-                  'No paired users yet',
+                  'No locked in users yet',
                   style: AppTextStyles.bodyText400.copyWith(
                     fontSize: 14.sp,
                     color: AppColors.grey500,
@@ -878,7 +897,7 @@ class SocialView extends GetView<SocialController> {
                 ),
                 SizedBox(height: 1.h),
                 Text(
-                  'Start pairing with other users to see them here',
+                  'Start locked in with other users to see them here',
                   style: AppTextStyles.bodyText400.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.grey400,
@@ -893,13 +912,13 @@ class SocialView extends GetView<SocialController> {
             itemCount: pairedUsers.length,
             itemBuilder: (context, index) {
               final pairedUser = pairedUsers[index];
-              return _buildPairedUserCard(pairedUser);
+              return _buildLockedInUserCard(pairedUser);
             },
           );
     });
   }
 
-  Widget _buildPairedUserCard(pairedUser) {
+  Widget _buildLockedInUserCard(pairedUser) {
     return Container(
       margin: EdgeInsets.only(bottom: 2.h),
       padding: EdgeInsets.all(4.w),
@@ -1005,7 +1024,7 @@ class SocialView extends GetView<SocialController> {
                     ),
                     SizedBox(height: 0.5.h),
                     Text(
-                      'PAIRED',
+                      'LOCKED IN',
                       style: AppTextStyles.bodyTextBold.copyWith(
                         fontSize: 8.sp,
                         color:
