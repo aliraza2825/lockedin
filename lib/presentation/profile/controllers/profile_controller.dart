@@ -7,7 +7,6 @@ import '../../../app/config/local_keys.dart';
 import '../../../app/routes/app_pages.dart';
 import '../../../data/models/user_profile.dart';
 import '../../../data/provider/local_storage/local_db.dart';
-import '../../../data/Services/chat_service.dart';
 
 class ProfileController extends GetxController {
   final ProfileRepository _repository = ProfileRepository();
@@ -45,8 +44,6 @@ class ProfileController extends GetxController {
     try {
       final response = await _repository.deleteAccount();
       if (response != null && response['status'] == 200) {
-        // Unregister ChatService before account deletion
-        ChatService.unregisterOnLogout();
 
         var data = await LocalDB.getData(LocalDataKey.language.name);
         LocalDB.clear();

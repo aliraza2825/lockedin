@@ -1,5 +1,3 @@
-import 'package:locked_in/data/Services/chat_service.dart';
-import 'package:locked_in/presentation/chat/controllers/chat_controller.dart';
 import 'package:locked_in/presentation/home/controllers/home_controller.dart';
 import 'package:locked_in/presentation/home/views/home_view.dart';
 import 'package:locked_in/presentation/profile/controllers/profile_controller.dart';
@@ -19,14 +17,12 @@ class NavbarController extends GetxController {
   @override
   void onInit() {
     Get.put(ProfileController());
-    Get.put(ChatService());
     Get.put(SocialController());
 
     pages = [const SocialView(), const HomeView(), const ProfileView()];
 
     Get.put(ProfileController());
     Get.put(HomeController());
-    Get.put(ChatController());
     super.onInit();
   }
 

@@ -1,14 +1,7 @@
-import 'dart:io';
 
 import 'package:locked_in/data/models/user_profile.dart';
-import 'package:locked_in/presentation/profile/controllers/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sizer/sizer.dart';
-
-import '../../../app/config/app_text_styles.dart';
-import '../../../app/utils/image_utility.dart';
-import '../../../app/utils/utils.dart';
 import '../../../data/repositories/diy_repository.dart';
 
 class AccountSettingController extends GetxController {
